@@ -1,3 +1,3 @@
-# python-web-scrapper
+# python-practices
 
-Assignments for Nomad Coder's Python Web Scrapper class.
+Assignments and practices based on Nomad Coder's Python Web Scraper class.
