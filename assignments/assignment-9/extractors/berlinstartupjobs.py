@@ -27,7 +27,7 @@ def extract_berlinstartupjobs(keyword):
             job_data = {
                 "title": job_title,
                 "company": company_name,
-                "description": job_description,
+                "location": "Berlin, Germany", 
                 "link": job_link
             }
 
