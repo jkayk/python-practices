@@ -8,5 +8,14 @@
     </head>
     <body>
         <h1>Search results for "{{keyword}}"</h1>
+        {% for job in jobs %}
+            <div>
+                <span>{{ job.title }}</span>
+                <span>{{ job.company }}</span>
+                <span>{{ job.location }}</span>
+                <span>{{ job.description }}</span>
+                <a href="{{ job.url }}">Apply &rarr;</a>
+            </div>
+        {% endfor %}
     </body>
 </html>
