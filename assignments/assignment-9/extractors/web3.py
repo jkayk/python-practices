@@ -1,25 +1,17 @@
 from playwright.sync_api import sync_playwright
+from playwright_stealth import stealth_sync
 from bs4 import BeautifulSoup
 
-def extract_web3(keyword):
-    print(f"Scraping We Work Remotely for {keyword} jobs...")
-    
-    p = sync_playwright().start()  
-
-    browser = p.chromium.launch() 
-    page = browser.new_page()
-    page.goto(f"https://web3.career/{keyword}-jobs")
-
+def scrape_jobs(page):
     content = page.content()
     soup = BeautifulSoup(content, "html.parser")
-    
-    jobs = soup.find_all("tr", class_="table_row")
+
+    jobs_db = []
+
     jobs = [
         tr for tr in soup.find_all("tr", class_="table_row")
         if "border-paid-table" not in tr.get("class", [])
     ]
-
-    jobs_db = []
 
     for job in jobs:
         job_title_elem = job.find("div", class_="job-title-mobile").find("a").find("h2")
@@ -43,9 +35,41 @@ def extract_web3(keyword):
         }
         
         jobs_db.append(job_data)
-
-    print("Finished scraping Web3.")
+    
     return jobs_db
+
+def extract_web3(keyword):
+    print(f"Scraping We Work Remotely for {keyword} jobs...")
+    
+    p = sync_playwright().start()  
+    browser = p.chromium.launch(headless=False) 
+    page = browser.new_page(
+        extra_http_headers={
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36"
+        }
+    )
+    stealth_sync(page)
+    page.goto(f"https://web3.career/{keyword}-jobs?page=1")
+
+    all_jobs_db = []
+
+    while True:
+        # Perform scraping on the current page
+        jobs = scrape_jobs(page)
+        all_jobs_db.extend(jobs)
+
+        # Check if the "Next" button is disabled
+        next_button_li = page.locator("ul.pagination li.next")  # Locate the <li> of "Next"
+        if next_button_li.get_attribute("class") == "page-item next disabled":
+            break  # Stop if "Next" is disabled
+
+        # Click "Next" button and wait for the page to load
+        next_button = next_button_li.locator("a.page-link")
+        next_button.click()
+        page.wait_for_load_state("domcontentloaded")
+
+    browser.close()
+    return all_jobs_db
 
 def save_to_file(file_name, jobs):
     file = open(f"{file_name}_jobs.csv", "w")
