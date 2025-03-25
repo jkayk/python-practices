@@ -71,14 +71,3 @@ def extract_web3(keyword):
         browser.close()
     
     return all_jobs_db
-
-"""
-def save_to_file(file_name, jobs):
-    file = open(f"{file_name}_jobs.csv", "w")
-    file.write("Title, Company, Location, URL\n")
-    for job in jobs:
-        file.write(f"{job['title']}, {job['company']}, {job['location']}, {job['link']}\n")
-    file.close()
-
-save_to_file("python", extract_web3("python"))
-"""
